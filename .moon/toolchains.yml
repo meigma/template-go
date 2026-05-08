@@ -4,13 +4,18 @@
 
 javascript:
   packageManager: 'npm'
-  inferTasksFromScripts: true
+  inferTasksFromScripts: false
+  dedupeOnLockfileChange: false
+  syncProjectWorkspaceDependencies: false
 
 npm: {}
 
 node:
   version: '22.22.2'
   syncVersionManagerConfig: 'nvm'
+
+go:
+  version: '1.26.2'
 
 # Configure npm directly when you want to pin the CLI or customize installs.
 # npm:
@@ -32,9 +37,6 @@ node:
 #   version: 'REPLACE_ME_DENO_VERSION'
 
 # Stable non-JavaScript toolchains in Moon v2.
-# go:
-#   version: 'REPLACE_ME_GO_VERSION'
-#
 # rust:
 #   version: 'REPLACE_ME_RUST_VERSION'
 #   components: ['clippy', 'rustfmt']

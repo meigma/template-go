@@ -8,12 +8,12 @@
 # - Supported settings are applied directly through the GitHub REST API.
 # - Unsupported settings stay in this file so the script can report manual follow-ups.
 # - The branch ruleset follows the repository default branch via ~DEFAULT_BRANCH.
-# - Status checks are enabled in the screenshots, but the actual contexts are repository-specific.
-#   Fill them in before expecting the status-check rules to be applied.
+# - Status checks default to the standard template CI check. Adjust them when
+#   the repository adds more required workflows.
 
 [repository]
 default_branch = "master"
-is_template = false
+is_template = true
 immutable_releases = true
 
 has_wiki = false
@@ -72,7 +72,7 @@ enabled = true
 strict_required_status_checks_policy = false
 do_not_enforce_on_create = false
 contexts = [
-  # "ci / build",
+  "ci",
 ]
 
 [rulesets.tags_default]
@@ -88,6 +88,8 @@ block_force_pushes = true
 
 bypass = [
   { type = "repository_admin_role", mode = "always" },
+  # Enable the release workflow before uncommenting this app bypass. Release
+  # Please needs tag-creation bypass because tags are protected here.
   # { type = "app", slug = "meigma-release-please", mode = "always" },
 ]
 
@@ -96,7 +98,8 @@ enabled = true
 strict_required_status_checks_policy = false
 do_not_enforce_on_create = false
 contexts = [
-  # "release / verify",
+  # "release-dry-run",
+  # "release",
 ]
 
 [unsupported]

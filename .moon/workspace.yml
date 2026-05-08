@@ -21,11 +21,14 @@ projects:
   # Uncomment if glob-discovered IDs are likely to collide.
   # globFormat: 'source-path'
 
-defaultProject: 'docs'
+defaultProject: 'root'
 
 vcs:
-  defaultBranch: 'main'
+  defaultBranch: 'master'
   provider: 'github'
+
+pipeline:
+  installDependencies: false
 
 # Uncomment when you want Moon to aggregate project owners into CODEOWNERS.
 # codeowners:

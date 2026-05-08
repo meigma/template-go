@@ -1,16 +1,16 @@
 ---
-title: PROJECT_NAME Docs
+title: template-go Docs
 slug: /
-description: Starting point for PROJECT_NAME documentation.
+description: Starting point for Meigma Go projects.
 ---
 
-# PROJECT_NAME Docs
+# template-go Docs
 
-This site is the starting point for `PROJECT_NAME` documentation.
+This repository is the starting point for Meigma Go projects.
 
-Replace this page with:
+Generated projects should replace this page with project-specific documentation after bootstrapping:
 
-- `PROJECT_SUMMARY`
-- `QUICKSTART_STEPS`
-- `GUIDES_AND_REFERENCE_LINKS`
-- `SUPPORT_AND_CONTACT_PATHS`
+- project summary
+- quick start
+- operating notes
+- support and security paths

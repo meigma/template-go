@@ -1,62 +1,76 @@
-# PROJECT_NAME
+# template-go
 
-> Template note: replace every `ALL_CAPS` placeholder in this file before publishing or sharing the repository.
+`template-go` is the reusable Go repository starter for Meigma projects.
+It includes a small Go CLI skeleton, Moon tasks, pinned CI, Dependabot, baseline repository security settings, and a dormant Release Please plus GoReleaser release layer.
 
-`PROJECT_NAME` is `PROJECT_SUMMARY`.
-It is intended for `PRIMARY_USE_CASE` and is maintained by `AUTHOR_NAME` or `ORGANIZATION_NAME`.
+## Local Bootstrap
 
-## Quick Start
+Prerequisites:
 
-Replace this section with the shortest working path for a new user.
+- Go 1.26.2
+- Moon 2.x
+- Node.js 22.22.2 for the Docusaurus docs project
 
-### Prerequisites
-
-- `REPLACE_ME_RUNTIME_OR_LANGUAGE`
-- `REPLACE_ME_REQUIRED_TOOLING`
-- `REPLACE_ME_EXTERNAL_DEPENDENCIES`
-
-### Install
+After creating a new repository from this template, replace the placeholder names before doing feature work:
 
 ```sh
-REPLACE_ME_INSTALL_COMMAND
+go mod edit -module github.com/meigma/YOUR_REPO
+mv cmd/template-go cmd/YOUR_BINARY
 ```
 
-### Run
+Then update `template-go` references in the Moon tasks, GoReleaser config, `ghd.toml`, README, and package docs.
+
+## Common Tasks
+
+Moon is the standard task front door:
 
 ```sh
-REPLACE_ME_START_COMMAND
+moon run root:format
+moon run root:lint
+moon run root:build
+moon run root:test
+moon run root:check
 ```
 
-## Usage
-
-Replace this section with the most common workflow for the repository.
+CI runs the same aggregate check:
 
 ```sh
-REPLACE_ME_PRIMARY_COMMAND_OR_ENTRYPOINT
+moon ci --summary minimal
 ```
 
-Expected result:
+The starter CLI is intentionally small:
 
-- `REPLACE_ME_EXPECTED_OUTPUT_OR_BEHAVIOR`
+```sh
+go run ./cmd/template-go --version
+go run ./cmd/template-go --message "hello from cobra"
+go test ./...
+```
 
-## Configuration
+The CLI entrypoint uses Cobra and Viper in the same shape as other Meigma CLIs: `cmd/template-go` stays thin, `internal/cli` owns command construction, and Viper-backed flags can also be supplied through `TEMPLATE_GO_*` environment variables.
 
-Document the minimum configuration needed to use the project.
+## CI and Security
 
-- `REPLACE_ME_ENV_VAR_NAME`: `REPLACE_ME_ENV_VAR_DESCRIPTION`
-- `REPLACE_ME_CONFIG_FILE`: `REPLACE_ME_CONFIG_FILE_PURPOSE`
+The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
+Dependabot covers GitHub Actions, the root Go module, and the docs npm project.
 
-## Documentation
+Repository settings live in `.github/repository-settings.toml`.
+They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, and protected tags.
 
-- Main docs: `REPLACE_ME_DOCS_URL_OR_PATH`
-- Examples: `REPLACE_ME_EXAMPLES_URL_OR_PATH`
-- Architecture notes: `REPLACE_ME_ARCHITECTURE_DOC_URL_OR_PATH`
+## Release Layer
 
-## Support
+Release automation is included but disabled by default.
+Projects that release binaries can enable it by moving the templates from `.github/workflows.disabled/` into `.github/workflows/`, then configuring the release app credentials and tag-ruleset bypass documented in those files.
 
-Use `REPLACE_ME_SUPPORT_CHANNEL` for questions and general support.
-Use `REPLACE_ME_BUG_REPORT_CHANNEL` for non-security bug reports.
-Do not report vulnerabilities in public channels. See [SECURITY.md](SECURITY.md).
+The release path is:
+
+- Release Please opens and maintains the release PR.
+- Release Please creates a draft GitHub release and tag after merge.
+- GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
+- The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
+- A human inspects the draft release before publication.
+
+The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow is enabled.
+After cloning this template, update `provenance.signer_workflow`, package names, asset patterns, and binary paths to match the new repository and binary name.
 
 ## Contributing
 
@@ -68,8 +82,4 @@ See [SECURITY.md](SECURITY.md) for supported versions and the private vulnerabil
 
 ## License
 
-Replace this section with the actual license name and add the corresponding `LICENSE` file to the repository.
-
-Example:
-
-`PROJECT_NAME` is licensed under the `REPLACE_ME_LICENSE_NAME`.
+Add the repository license before publishing a project generated from this template.
