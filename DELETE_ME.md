@@ -1,7 +1,7 @@
 # Welcome to the Meigma Go Template
 
 This repository was generated from `template-go`, the standard starter for Meigma Go projects.
-It is meant to give new repositories a working baseline on day one: a small Go CLI, Moon task orchestration, pinned CI, dependency automation, repository security defaults, and a dormant release pipeline that can be enabled when the project needs it.
+It is meant to give new repositories a working baseline on day one: a small Go CLI, Moon task orchestration, pinned CI, dependency automation, repository security defaults, and an enabled release pipeline that has already been exercised by the template application.
 
 Delete this file after you finish the first-repository setup checklist below.
 It is only here to orient the initial project owner.
@@ -16,7 +16,7 @@ It is only here to orient the initial project owner.
 - Dependabot coverage for GitHub Actions, Go modules, and the docs npm project.
 - Docusaurus docs scaffolding under `docs/`.
 - Repository settings for signed commits, squash-only merges, immutable releases, private vulnerability reporting, and protected tags.
-- Disabled release workflows for Release Please, GoReleaser, checksums, SBOMs, and GitHub artifact attestations.
+- Release workflows for Release Please, GoReleaser, checksums, SBOMs, and GitHub artifact attestations.
 - A root `ghd.toml` package manifest so released binaries can be installed with `ghd`.
 
 ## How It Works
@@ -34,9 +34,8 @@ The GitHub Actions CI workflow runs the same path through:
 moon ci --summary minimal
 ```
 
-The release machinery is intentionally present but disabled.
-Workflows live in `.github/workflows.disabled/` so they cannot run by accident.
-When a project is ready to release binaries, move the relevant workflow files into `.github/workflows/`, configure the release app credentials and tag-ruleset bypass, then run the dry-run workflow before publishing.
+The release machinery is intentionally enabled in the template repository so the starter app proves Release Please, GoReleaser, container image builds, artifact validation, and attestations before generated projects inherit the setup.
+When creating a new project, configure the release app credentials and tag-ruleset bypass for that repository, update the GHCR image name, then let the dry-run workflow pass before publishing the first release.
 
 ## First Setup Checklist
 
@@ -72,11 +71,11 @@ When a project is ready to release binaries, move the relevant workflow files in
    moon run root:check
    ```
 
-6. Decide what to do with releases:
+6. Configure or remove releases:
 
-   - Keep `.github/workflows.disabled/` if this project may release binaries later.
-   - Delete the disabled release files if this project will never publish releases.
-   - Enable them only after reviewing `.goreleaser.yaml`, `release-please-config.json`, and the workflow comments.
+   - Keep the enabled workflows if this project publishes binaries or a container image.
+   - Delete the release workflows if this project will never publish releases.
+   - Review `.goreleaser.yaml`, `release-please-config.json`, `Dockerfile`, `.github/workflows/release*.yml`, and repository release app settings before the first real release.
    - Keep and update `ghd.toml` if the binary should be installable through `ghd`.
 
 7. Update project-facing docs:
