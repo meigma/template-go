@@ -1,7 +1,7 @@
 # template-go
 
 `template-go` is the reusable Go repository starter for Meigma projects.
-It includes a small Go CLI skeleton, Moon tasks, pinned CI, Dependabot, baseline repository security settings, and a dormant Release Please plus GoReleaser release layer.
+It includes a small Go CLI skeleton, Moon tasks, pinned CI, Dependabot, baseline repository security settings, and an enabled Release Please plus GoReleaser release layer.
 
 ## Local Bootstrap
 
@@ -48,6 +48,37 @@ go test ./...
 
 The CLI entrypoint uses Cobra and Viper in the same shape as other Meigma CLIs: `cmd/template-go` stays thin, `internal/cli` owns command construction, and Viper-backed flags can also be supplied through `TEMPLATE_GO_*` environment variables.
 
+## Container Image
+
+The included Dockerfile builds a static Linux binary and copies it into a non-root distroless runtime image:
+
+```sh
+docker build --build-arg GO_VERSION="$(cat .go-version)" --target test .
+docker build --build-arg GO_VERSION="$(cat .go-version)" -t template-go:dev .
+docker run --rm template-go:dev --version
+```
+
+Docker does not let a Dockerfile read `.go-version` early enough to choose the `FROM golang:<version>` image tag by itself. The Dockerfile accepts `GO_VERSION` as a build argument and verifies the selected builder image matches `.go-version`.
+
+For quick local iteration, the checked-in default also matches `.go-version`:
+
+```sh
+docker build --target test .
+docker build -t template-go:dev .
+docker run --rm template-go:dev --version
+```
+
+Release builds can pass the same metadata injected by GoReleaser:
+
+```sh
+docker build \
+  --build-arg GO_VERSION="$(cat .go-version)" \
+  --build-arg VERSION="$(git describe --tags --always --dirty)" \
+  --build-arg COMMIT="$(git rev-parse HEAD)" \
+  --build-arg DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  -t template-go:dev .
+```
+
 ## CI and Security
 
 The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
@@ -58,19 +89,21 @@ They default to immutable releases, private vulnerability reporting, signed comm
 
 ## Release Layer
 
-Release automation is included but disabled by default.
-Projects that release binaries can enable it by moving the templates from `.github/workflows.disabled/` into `.github/workflows/`, then configuring the release app credentials and tag-ruleset bypass documented in those files.
+Release automation is enabled for the template application so this repository proves the full binary and container release lifecycle before generated projects inherit it.
+Repositories generated from the template should update the release app credentials, package names, asset patterns, container image name, and `ghd.toml` signer workflow before cutting their first release.
 
 The release path is:
 
 - Release Please opens and maintains the release PR.
 - Release Please creates a draft GitHub release and tag after merge.
+- Release Dry Run rehearses the GoReleaser binary path and Docker container build path on pull requests.
 - GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
 - The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
+- The release workflow publishes `ghcr.io/meigma/template-go:vX.Y.Z` and creates a GitHub-native attestation for the pushed image digest.
 - A human inspects the draft release before publication.
 
-The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow is enabled.
-After cloning this template, update `provenance.signer_workflow`, package names, asset patterns, and binary paths to match the new repository and binary name.
+The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow runs.
+After cloning this template, update `provenance.signer_workflow`, package names, asset patterns, binary paths, and image names to match the new repository and binary name.
 
 ## Contributing
 
