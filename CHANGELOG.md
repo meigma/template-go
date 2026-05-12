@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/meigma/template-go/compare/v0.1.1...v0.1.2) (2026-05-12)
+
+
+### Bug Fixes
+
+* **release:** resolve drafts with explicit repository ([#6](https://github.com/meigma/template-go/issues/6)) ([c6e8f2d](https://github.com/meigma/template-go/commit/c6e8f2dc2b38be293efc70b827887d94e785f339))
+
 ## [0.1.1](https://github.com/meigma/template-go/compare/template-go-v0.1.0...template-go-v0.1.1) (2026-05-12)
 
 
