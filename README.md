@@ -7,7 +7,7 @@ It includes a small Go CLI skeleton, Moon tasks, pinned CI, Dependabot, baseline
 
 Prerequisites:
 
-- Go 1.26.2
+- Go 1.26.3
 - Moon 2.x
 - Node.js 22.22.2 for the Docusaurus docs project
 
@@ -73,6 +73,7 @@ docker build \
 ## CI and Security
 
 The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
+It uses GitHub-hosted dependency caches for Go, golangci-lint, and npm download artifacts while leaving Moon remote caching as an optional follow-up for repositories that need a shared task-output cache.
 The scheduled security scan workflow builds the local container image weekly, scans it for high/critical fixed vulnerabilities, and uploads SARIF results to GitHub code scanning.
 Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs npm project.
 

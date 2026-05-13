@@ -302,6 +302,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           provenance: mode=max
           sbom: true
+          cache-from: type=gha,scope=template-go-release
+          cache-to: type=gha,mode=max,scope=template-go-release
           build-args: |
             VERSION=${{ steps.image.outputs.version }}
             COMMIT=${{ steps.image.outputs.commit }}
