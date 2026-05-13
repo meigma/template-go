@@ -53,26 +53,17 @@ The CLI entrypoint uses Cobra and Viper in the same shape as other Meigma CLIs: 
 The included Dockerfile builds a static Linux binary and copies it into a non-root distroless runtime image:
 
 ```sh
-docker build --build-arg GO_VERSION="$(cat .go-version)" --target test .
-docker build --build-arg GO_VERSION="$(cat .go-version)" -t template-go:dev .
-docker run --rm template-go:dev --version
-```
-
-Docker does not let a Dockerfile read `.go-version` early enough to choose the `FROM golang:<version>` image tag by itself. The Dockerfile accepts `GO_VERSION` as a build argument and verifies the selected builder image matches `.go-version`.
-
-For quick local iteration, the checked-in default also matches `.go-version`:
-
-```sh
 docker build --target test .
 docker build -t template-go:dev .
 docker run --rm template-go:dev --version
 ```
 
-Release builds can pass the same metadata injected by GoReleaser:
+The Dockerfile pins the builder and runtime images by digest and verifies that the selected Go builder image matches `.go-version`. When bumping Go, update `.go-version` and the builder `FROM` tag/digest together.
+
+Release builds can pass the same binary metadata injected by GoReleaser:
 
 ```sh
 docker build \
-  --build-arg GO_VERSION="$(cat .go-version)" \
   --build-arg VERSION="$(git describe --tags --always --dirty)" \
   --build-arg COMMIT="$(git rev-parse HEAD)" \
   --build-arg DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -82,7 +73,8 @@ docker build \
 ## CI and Security
 
 The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
-Dependabot covers GitHub Actions, the root Go module, and the docs npm project.
+The scheduled security scan workflow builds the local container image weekly, scans it for high/critical fixed vulnerabilities, and uploads SARIF results to GitHub code scanning.
+Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs npm project.
 
 Repository settings live in `.github/repository-settings.toml`.
 They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, and protected tags.
@@ -99,7 +91,7 @@ The release path is:
 - Release Dry Run rehearses the GoReleaser binary path and Docker container build path on pull requests.
 - GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
 - The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
-- The release workflow publishes `ghcr.io/meigma/template-go:vX.Y.Z` and creates a GitHub-native attestation for the pushed image digest.
+- The release workflow publishes `ghcr.io/meigma/template-go:vX.Y.Z`, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the pushed image digest.
 - A human inspects the draft release before publication.
 
 The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow runs.

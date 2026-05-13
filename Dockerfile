@@ -1,9 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG GO_VERSION=1.26.2
-ARG RUNTIME_IMAGE=gcr.io/distroless/static-debian12:nonroot
-
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-bookworm AS deps
+FROM --platform=$BUILDPLATFORM golang:1.26.3-bookworm@sha256:252599aeb51ad60b83e4d8821802068127c528c707cb7dd7afd93be057c6011c AS deps
 WORKDIR /src
 
 ENV CGO_ENABLED=0
@@ -11,7 +8,8 @@ ENV CGO_ENABLED=0
 COPY .go-version go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
     expected="$(cat .go-version)" && \
-    actual="$(go env GOVERSION | sed 's/^go//')" && \
+    actual="$(go env GOVERSION)" && \
+    actual="${actual#go}" && \
     if [ "${expected}" != "${actual}" ]; then \
       echo "Go builder version ${actual} does not match .go-version ${expected}" >&2; \
       exit 1; \
@@ -44,7 +42,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
       -o /out/template-go \
       ./cmd/template-go
 
-FROM ${RUNTIME_IMAGE} AS runtime
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:a9329520abc449e3b14d5bc3a6ffae065bdde0f02667fa10880c49b35c109fd1 AS runtime
 ARG VERSION=dev
 ARG COMMIT=none
 ARG SOURCE=https://github.com/meigma/template-go

@@ -13,7 +13,8 @@ It is only here to orient the initial project owner.
 - Moon tasks for `format`, `lint`, `build`, `test`, and `check`.
 - `golangci-lint` wired through Proto and Moon.
 - CI that delegates to `moon ci --summary minimal` with pinned actions and minimal token permissions.
-- Dependabot coverage for GitHub Actions, Go modules, and the docs npm project.
+- A scheduled container vulnerability scan that uploads SARIF results to GitHub code scanning.
+- Dependabot coverage for GitHub Actions, Docker base images, Go modules, and the docs npm project.
 - Docusaurus docs scaffolding under `docs/`.
 - Repository settings for signed commits, squash-only merges, immutable releases, private vulnerability reporting, and protected tags.
 - Release workflows for Release Please, GoReleaser binary assets, GHCR container images, checksums, SBOMs, and GitHub artifact attestations.
@@ -82,16 +83,17 @@ The nominal generated-project path is a CLI or service with both downloadable bi
 
    - Update `.goreleaser.yaml`: `project_name`, build `id`, `main`, binary name, archive name template, and any linked package paths.
    - Update `ghd.toml`: `provenance.signer_workflow`, package name, description, asset patterns, and installed binary path.
-   - Update `Dockerfile`: binary path, labels, default `SOURCE`, and runtime command if this is a service instead of a CLI.
+   - Update `Dockerfile`: binary path, labels, default `SOURCE`, base-image tags/digests, and runtime command if this is a service instead of a CLI.
    - Update `.github/workflows/release.yml`: `IMAGE_NAME`, binary validation names, container labels, summary commands, and verification examples.
    - Update `.github/workflows/release-dry-run.yml`: binary validation names, local container image name, and smoke-test commands.
+   - Update `.github/workflows/security-scan.yml`: local container image name and scan category.
    - Update `.github/repository-settings.toml` only if required status-check names change.
 
    For binary-only projects:
 
    - Keep `.goreleaser.yaml`, `ghd.toml`, `Release Please`, `Binary Release Dry Run`, and the binary asset portions of `release.yml`.
    - Remove the `container-image-release` job, container verification summary text, and `Container Image Dry Run`.
-   - Remove `Dockerfile` and `.dockerignore` if no container build remains.
+   - Remove `Dockerfile`, `.dockerignore`, and `.github/workflows/security-scan.yml` if no container build remains.
    - Remove `Container Image Dry Run` from required branch checks.
 
    For container-only projects:
@@ -104,7 +106,7 @@ The nominal generated-project path is a CLI or service with both downloadable bi
    For library-only projects:
 
    - Keep Release Please if version tags and changelogs are useful.
-   - Delete `.github/workflows/release.yml`, `.github/workflows/release-dry-run.yml`, `.goreleaser.yaml`, `ghd.toml`, `Dockerfile`, and `.dockerignore` unless the library publishes some other artifact.
+   - Delete `.github/workflows/release.yml`, `.github/workflows/release-dry-run.yml`, `.github/workflows/security-scan.yml`, `.goreleaser.yaml`, `ghd.toml`, `Dockerfile`, and `.dockerignore` unless the library publishes some other artifact.
    - Remove release dry-run checks from `.github/repository-settings.toml`.
    - If the library should not create releases at all, delete `.github/workflows/release-please.yml`, `release-please-config.json`, `.release-please-manifest.json`, and `CHANGELOG.md`.
 
