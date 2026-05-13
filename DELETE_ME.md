@@ -12,7 +12,7 @@ It is only here to orient the initial project owner.
 - A Cobra/Viper CLI skeleton under `cmd/template-go` and `internal/cli`.
 - Moon tasks for `format`, `lint`, `build`, `test`, and `check`.
 - `golangci-lint` wired through Proto and Moon.
-- CI that delegates to `moon ci --summary minimal` with pinned actions and minimal token permissions.
+- CI that delegates to `moon ci --summary minimal` with pinned actions, dependency caches, and minimal token permissions.
 - A scheduled container vulnerability scan that uploads SARIF results to GitHub code scanning.
 - Dependabot coverage for GitHub Actions, Docker base images, Go modules, and the docs npm project.
 - Docusaurus docs scaffolding under `docs/`.
@@ -34,6 +34,8 @@ The GitHub Actions CI workflow runs the same path through:
 ```sh
 moon ci --summary minimal
 ```
+
+The workflow caches Go modules, Go build artifacts, golangci-lint state, and npm's download cache through GitHub Actions. If that is not enough for a larger generated repository, add Moon remote caching later with Depot or another Bazel Remote Execution-compatible backend and repository credentials.
 
 The release machinery is intentionally enabled in the template repository so the starter app proves Release Please, GoReleaser binary releases, container image builds, artifact validation, and attestations before generated projects inherit the setup.
 The nominal generated-project path is a CLI or service with both downloadable binaries and a container image. If the new project is binary-only, container-only, or a pure Go library, trim the release files as described below before the first release.

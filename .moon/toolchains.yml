@@ -15,7 +15,7 @@ node:
   syncVersionManagerConfig: 'nvm'
 
 go:
-  version: '1.26.2'
+  version: '1.26.3'
 
 # Configure npm directly when you want to pin the CLI or customize installs.
 # npm:
