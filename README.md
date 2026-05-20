@@ -89,10 +89,10 @@ The release path is:
 
 - Release Please opens and maintains the release PR.
 - Release Please creates a draft GitHub release and tag after merge.
-- Release Dry Run rehearses the GoReleaser binary path and Docker container build path on pull requests.
+- Release Dry Run rehearses the GoReleaser binary path and native-runner Docker container build path on pull requests.
 - GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
 - The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
-- The release workflow publishes `ghcr.io/meigma/template-go:vX.Y.Z`, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the pushed image digest.
+- The release workflow builds amd64 and arm64 container images on native GitHub-hosted runners, publishes `ghcr.io/meigma/template-go:vX.Y.Z` as a multi-platform manifest, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the manifest digest.
 - A human inspects the draft release before publication.
 
 The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow runs.
