@@ -2,8 +2,8 @@
 """Configure GitHub repository settings from a TOML manifest.
 
 Usage:
-  uv run scripts/configure_github_repo.py plan --repo OWNER/REPO
-  uv run scripts/configure_github_repo.py apply --repo OWNER/REPO
+  uv run .github/scripts/configure_github_repo.py plan --repo OWNER/REPO
+  uv run .github/scripts/configure_github_repo.py apply --repo OWNER/REPO
 """
 
 from __future__ import annotations
