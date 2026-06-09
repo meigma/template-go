@@ -31,7 +31,7 @@ updates:
       - dependencies
       - docker
 
-  - package-ecosystem: npm
+  - package-ecosystem: uv
     directory: /docs
     schedule:
       interval: weekly

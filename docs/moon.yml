@@ -1,46 +1,46 @@
-language: 'typescript'
+language: 'python'
 layer: 'application'
 stack: 'frontend'
 tags:
   - 'docs'
-  - 'docusaurus'
+  - 'mkdocs'
+  - 'uv'
 
 project:
   title: 'template-go docs'
-  description: 'Docusaurus documentation site for the Meigma Go repository template.'
+  description: 'MkDocs documentation site for the Meigma Go repository template.'
   owner: 'meigma'
   maintainers:
     - 'meigma'
 
 toolchains:
-  default: 'node'
+  default: 'unstable_python'
 
 fileGroups:
   configs:
-    - 'docusaurus.config.ts'
-    - 'tsconfig.json'
-    - 'package.json'
-    - 'package-lock.json'
+    - 'mkdocs.yml'
+    - 'pyproject.toml'
+    - 'uv.lock'
+    - '.python-version'
   sources:
     - 'docs/**/*'
-    - 'src/**/*'
-    - 'static/**/*'
 
 tasks:
   install:
-    command: 'npm ci'
-    toolchains: ['javascript', 'node', 'npm']
+    command: 'uv sync --locked'
+    toolchains: ['unstable_python', 'unstable_uv']
     inputs:
-      - 'package.json'
-      - 'package-lock.json'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.python-version'
     outputs:
-      - 'node_modules/.package-lock.json'
+      - '.venv/pyvenv.cfg'
     options:
       cache: false
 
   build:
-    command: 'npm run build'
-    toolchains: ['javascript', 'node', 'npm']
+    command: 'uv run --locked mkdocs build --strict'
+    toolchains: ['unstable_python', 'unstable_uv']
     deps:
       - 'docs:install'
     inputs:
@@ -49,9 +49,9 @@ tasks:
     outputs:
       - 'build/**/*'
 
-  typecheck:
-    command: 'npm run typecheck'
-    toolchains: ['javascript', 'node', 'npm']
+  serve:
+    command: 'uv run --locked mkdocs serve --dev-addr 127.0.0.1:8000'
+    toolchains: ['unstable_python', 'unstable_uv']
     deps:
       - 'docs:install'
     inputs:

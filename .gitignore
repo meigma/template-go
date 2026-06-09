@@ -47,6 +47,7 @@ site/
 *.egg-info/
 .eggs/
 pip-wheel-metadata/
+!docs/.python-version
 
 # Node / TypeScript
 node_modules/
@@ -68,9 +69,8 @@ pnpm-debug.log*
 coverage/
 
 # Template repo outputs
-docs/node_modules/
 docs/build/
-docs/.docusaurus/
+docs/.venv/
 
 # OS / editor
 .DS_Store

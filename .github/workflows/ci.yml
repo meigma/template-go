@@ -35,9 +35,9 @@ jobs:
           auto-setup: true
           cache-base: ${{ github.event.repository.default_branch }}
 
-      - name: Resolve npm cache directory
-        id: npm-cache
-        run: echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+      - name: Resolve uv cache directory
+        id: uv-cache
+        run: echo "dir=$(uv cache dir)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Go modules
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -65,13 +65,13 @@ jobs:
             ${{ runner.os }}-golangci-lint-${{ hashFiles('.go-version', '.golangci.yml', '.prototools', '.moon/proto/golangci-lint.toml', 'go.sum') }}-
             ${{ runner.os }}-golangci-lint-
 
-      - name: Cache npm downloads
+      - name: Cache uv downloads
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-docs-${{ hashFiles('docs/package-lock.json') }}
+          path: ${{ steps.uv-cache.outputs.dir }}
+          key: ${{ runner.os }}-uv-docs-${{ hashFiles('docs/uv.lock') }}
           restore-keys: |
-            ${{ runner.os }}-npm-docs-
+            ${{ runner.os }}-uv-docs-
 
       - name: Run Moon CI
         run: moon ci --summary minimal

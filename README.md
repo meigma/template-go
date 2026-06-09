@@ -9,7 +9,7 @@ Prerequisites:
 
 - Go 1.26.4
 - Moon 2.x
-- Node.js 22.22.2 for the Docusaurus docs project
+- Python 3.14.3 and uv 0.11.0 for the MkDocs documentation project
 
 After creating a new repository from this template, replace the placeholder names before doing feature work:
 
@@ -73,9 +73,9 @@ docker build \
 ## CI and Security
 
 The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
-It uses GitHub-hosted dependency caches for Go, golangci-lint, and npm download artifacts while leaving Moon remote caching as an optional follow-up for repositories that need a shared task-output cache.
+It uses GitHub-hosted dependency caches for Go, golangci-lint, and uv download artifacts while leaving Moon remote caching as an optional follow-up for repositories that need a shared task-output cache.
 The scheduled security scan workflow builds the local container image weekly, scans it for high/critical fixed vulnerabilities, and uploads SARIF results to GitHub code scanning.
-Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs npm project.
+Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs uv project.
 
 Repository settings live in `.github/repository-settings.toml`.
 They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, and protected tags.
