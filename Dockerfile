@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM --platform=$BUILDPLATFORM golang:1.26.3-bookworm@sha256:252599aeb51ad60b83e4d8821802068127c528c707cb7dd7afd93be057c6011c AS deps
+FROM --platform=$BUILDPLATFORM golang:1.26.4-bookworm@sha256:5d2b868674b57c9e48cdd39e891acce4196b6926ca6d11e9c270a8f85106203d AS deps
 WORKDIR /src
 
 ENV CGO_ENABLED=0
@@ -42,7 +42,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
       -o /out/template-go \
       ./cmd/template-go
 
-FROM gcr.io/distroless/static-debian12:nonroot@sha256:a9329520abc449e3b14d5bc3a6ffae065bdde0f02667fa10880c49b35c109fd1 AS runtime
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:d093aa3e30dbadd3efe1310db061a14da60299baff8450a17fe0ccc514a16639 AS runtime
 ARG VERSION=dev
 ARG COMMIT=none
 ARG SOURCE=https://github.com/meigma/template-go

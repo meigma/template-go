@@ -7,7 +7,7 @@ It includes a small Go CLI skeleton, Moon tasks, pinned CI, Dependabot, baseline
 
 Prerequisites:
 
-- Go 1.26.3
+- Go 1.26.4
 - Moon 2.x
 - Node.js 22.22.2 for the Docusaurus docs project
 
