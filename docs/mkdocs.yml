@@ -1,6 +1,6 @@
 site_name: template-go
 site_description: Meigma Go repository template
-site_url: https://docs.example.com/
+site_url: https://meigma.github.io/template-go/
 repo_name: meigma/template-go
 repo_url: https://github.com/meigma/template-go
 edit_uri: edit/master/docs/docs/

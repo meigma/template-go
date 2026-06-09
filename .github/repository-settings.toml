@@ -43,6 +43,10 @@ vulnerability_alerts = true
 # Dependabot security updates / automated security fixes.
 automated_security_fixes = true
 
+[pages]
+build_type = "workflow"
+https_enforced = true
+
 [rulesets.branch_default]
 name = "Default branch"
 enforcement = "active"

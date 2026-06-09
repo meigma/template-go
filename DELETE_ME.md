@@ -15,7 +15,7 @@ It is only here to orient the initial project owner.
 - CI that delegates to `moon ci --summary minimal` with pinned actions, dependency caches, and minimal token permissions.
 - A scheduled container vulnerability scan that uploads SARIF results to GitHub code scanning.
 - Dependabot coverage for GitHub Actions, Docker base images, Go modules, and the docs uv project.
-- MkDocs Material docs scaffolding under `docs/`.
+- MkDocs Material docs scaffolding under `docs/`, with GitHub Pages as the default publishing target.
 - Repository settings for signed commits, squash-only merges, immutable releases, private vulnerability reporting, and protected tags.
 - Release workflows for Release Please, GoReleaser binary assets, GHCR container images, checksums, SBOMs, and GitHub artifact attestations.
 - A root `ghd.toml` package manifest so released binaries can be installed with `ghd`.
@@ -36,6 +36,8 @@ moon ci --summary minimal
 ```
 
 The workflow caches Go modules, Go build artifacts, golangci-lint state, and uv's download cache through GitHub Actions. If that is not enough for a larger generated repository, add Moon remote caching later with Depot or another Bazel Remote Execution-compatible backend and repository credentials.
+
+The `GitHub Pages` workflow builds the MkDocs site on pull requests and deploys the default-branch `docs/build` output to Pages. The repository settings manifest defaults Pages to workflow-based publishing with HTTPS enforcement.
 
 The release machinery is intentionally enabled in the template repository so the starter app proves Release Please, GoReleaser binary releases, native-runner container image builds, artifact validation, and attestations before generated projects inherit the setup.
 The nominal generated-project path is a CLI or service with both downloadable binaries and a container image. If the new project is binary-only, container-only, or a pure Go library, trim the release files as described below before the first release.
@@ -72,6 +74,7 @@ The nominal generated-project path is a CLI or service with both downloadable bi
    ```
 
    Update Go imports, Moon metadata, README text, docs text, and CLI environment variable prefixes. For release-bearing projects, also update `.goreleaser.yaml`, `release-please-config.json`, `ghd.toml`, `Dockerfile`, and `.github/workflows/release*.yml` as applicable.
+   Update `docs/mkdocs.yml` with the generated repository's GitHub Pages URL, usually `https://OWNER.github.io/REPO/`.
 
 5. Refresh module metadata:
 

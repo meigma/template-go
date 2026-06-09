@@ -74,11 +74,12 @@ docker build \
 
 The default CI workflow keeps permissions minimal, pins external actions, disables checkout credential persistence, and delegates checks to Moon.
 It uses GitHub-hosted dependency caches for Go, golangci-lint, and uv download artifacts while leaving Moon remote caching as an optional follow-up for repositories that need a shared task-output cache.
+The docs workflow builds the MkDocs site on pull requests and deploys `docs/build` to GitHub Pages from the default branch.
 The scheduled security scan workflow builds the local container image weekly, scans it for high/critical fixed vulnerabilities, and uploads SARIF results to GitHub code scanning.
 Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs uv project.
 
 Repository settings live in `.github/repository-settings.toml`.
-They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, and protected tags.
+They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, GitHub Pages workflow publishing, and protected tags.
 
 ## Release Layer
 

@@ -51,6 +51,11 @@ SUPPORTED_STATUS_CHECK_KEYS = {
     "do_not_enforce_on_create",
     "contexts",
 }
+SUPPORTED_PAGES_FIELDS = {
+    "build_type",
+    "https_enforced",
+}
+SUPPORTED_PAGES_BUILD_TYPES = {"legacy", "workflow"}
 
 UNSUPPORTED_REASONS = {
     "preserve_repository": "GitHub Archive Program enrollment is not exposed through a documented repository REST API.",
@@ -169,6 +174,20 @@ class GitHubApi:
 
     def update_ruleset(self, owner: str, repo: str, ruleset_id: int, payload: dict[str, Any]) -> dict[str, Any]:
         return self._request_json("PATCH", f"/repos/{owner}/{repo}/rulesets/{ruleset_id}", payload)
+
+    def get_pages_site(self, owner: str, repo: str) -> dict[str, Any] | None:
+        try:
+            return self._request_json("GET", f"/repos/{owner}/{repo}/pages")
+        except ApiError as exc:
+            if exc.status == 404:
+                return None
+            raise
+
+    def create_pages_site(self, owner: str, repo: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request_json("POST", f"/repos/{owner}/{repo}/pages", payload, expected_statuses={201})
+
+    def update_pages_site(self, owner: str, repo: str, payload: dict[str, Any]) -> None:
+        self._request("PUT", f"/repos/{owner}/{repo}/pages", payload, expected_statuses={204})
 
     def resolve_app_actor_id(self, owner: str, repo: str, slug: str) -> int:
         cache_key = (self.hostname, slug)
@@ -334,15 +353,17 @@ def load_manifest(path: Path) -> dict[str, Any]:
         data = tomllib.load(handle)
 
     require_mapping(data, "manifest")
-    validate_top_level_keys(data, {"repository", "security", "rulesets", "unsupported"}, "manifest")
+    validate_top_level_keys(data, {"repository", "security", "pages", "rulesets", "unsupported"}, "manifest")
 
     repository = data.get("repository", {})
     security = data.get("security", {})
+    pages = data.get("pages", {})
     rulesets = data.get("rulesets", {})
     unsupported = data.get("unsupported", {})
 
     require_mapping(repository, "repository")
     require_mapping(security, "security")
+    require_mapping(pages, "pages")
     require_mapping(rulesets, "rulesets")
     require_mapping(unsupported, "unsupported")
 
@@ -362,6 +383,8 @@ def load_manifest(path: Path) -> dict[str, Any]:
         },
         "security",
     )
+    validate_top_level_keys(pages, SUPPORTED_PAGES_FIELDS, "pages")
+    validate_pages_table(pages)
     validate_top_level_keys(rulesets, {"branch_default", "tags_default"}, "rulesets")
 
     branch_ruleset = rulesets.get("branch_default", {})
@@ -431,6 +454,13 @@ def validate_ruleset_table(data: dict[str, Any], name: str, allow_pull_request: 
     status_checks = data.get("status_checks", {})
     require_mapping(status_checks, f"{name}.status_checks")
     validate_top_level_keys(status_checks, SUPPORTED_STATUS_CHECK_KEYS, f"{name}.status_checks")
+
+
+def validate_pages_table(data: dict[str, Any]) -> None:
+    build_type = data.get("build_type")
+    if build_type is not None and build_type not in SUPPORTED_PAGES_BUILD_TYPES:
+        allowed = ", ".join(sorted(SUPPORTED_PAGES_BUILD_TYPES))
+        raise ConfigError(f"pages.build_type must be one of: {allowed}")
 
 
 def resolve_token() -> str:
@@ -568,6 +598,10 @@ def build_plan(api: GitHubApi, owner: str, repo: str, config: dict[str, Any], mo
                 )
             )
 
+    pages_config = config.get("pages", {})
+    if pages_config:
+        changes.extend(plan_pages_changes(api, owner, repo, pages_config))
+
     unsupported.extend(extract_unsupported_settings(config))
 
     desired_branch_ruleset, branch_unsupported, branch_rule_types = build_ruleset_payload(
@@ -638,6 +672,60 @@ def coerce_dependency_graph_setting(security_config: dict[str, Any]) -> bool | N
         )
 
     return bool(vulnerability_alerts if vulnerability_alerts is not None else dependency_graph)
+
+
+def plan_pages_changes(api: GitHubApi, owner: str, repo: str, pages_config: dict[str, Any]) -> list[PlannedChange]:
+    desired = build_pages_state(pages_config)
+    current = api.get_pages_site(owner, repo)
+
+    if current is None:
+        update_payload = {
+            key: value
+            for key, value in desired.items()
+            if key not in {"build_type"}
+        }
+        return [
+            PlannedChange(
+                key="pages.site",
+                description="Create GitHub Pages site",
+                current=None,
+                desired=desired,
+                operation={
+                    "kind": "create_pages",
+                    "create_payload": {"build_type": desired["build_type"]},
+                    "update_payload": update_payload,
+                },
+            )
+        ]
+
+    current_normalized = normalize_pages_state(current, desired.keys())
+    if current_normalized == desired:
+        return []
+
+    return [
+        PlannedChange(
+            key="pages.site",
+            description="Update GitHub Pages site",
+            current=current_normalized,
+            desired=desired,
+            operation={"kind": "update_pages", "payload": desired},
+        )
+    ]
+
+
+def build_pages_state(pages_config: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "build_type": pages_config.get("build_type", "workflow"),
+        **(
+            {"https_enforced": bool(pages_config["https_enforced"])}
+            if "https_enforced" in pages_config
+            else {}
+        ),
+    }
+
+
+def normalize_pages_state(current: dict[str, Any], keys: Any) -> dict[str, Any]:
+    return {key: current.get(key) for key in keys}
 
 
 def extract_unsupported_settings(config: dict[str, Any]) -> list[UnsupportedSetting]:
@@ -1013,6 +1101,12 @@ def apply_plan(api: GitHubApi, owner: str, repo: str, plan: PlanResult) -> list[
             api.create_ruleset(owner, repo, operation["payload"])
         elif kind == "update_ruleset":
             api.update_ruleset(owner, repo, int(operation["ruleset_id"]), operation["payload"])
+        elif kind == "create_pages":
+            api.create_pages_site(owner, repo, operation["create_payload"])
+            if operation.get("update_payload"):
+                api.update_pages_site(owner, repo, operation["update_payload"])
+        elif kind == "update_pages":
+            api.update_pages_site(owner, repo, operation["payload"])
         else:
             raise ConfigError(f"Unsupported operation kind: {kind}")
         applied.append(change.description)
