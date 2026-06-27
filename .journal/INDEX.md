@@ -7,3 +7,4 @@
 | 003 | 2026-05-12 | Maximize CI caching | complete | Added GitHub-native dependency and BuildKit caching, then verified warm-cache CI reruns. |
 | 005 | 2026-05-19 | Extract GitHub release scripts | complete | Moved GitHub-specific scripts under `.github/scripts` and replaced release asset Bash with a tested Python helper. |
 | 006 | 2026-05-19 | Native ARM Docker runners | complete | Split container release dry-run and publish paths across native amd64 and arm64 hosted runners. |
+| 007 | 2026-06-27 | Open working session | in-progress | Session opened after setup; awaiting the user's substantive request. |
