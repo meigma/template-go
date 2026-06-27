@@ -19,3 +19,9 @@ What was done: Merged Dependabot PRs #27 (`actions/checkout` 7.0.0), #28 (`actio
 Verification: After each merge, the `master` push workflows passed. Final `master` is `7cc9241`; successful final runs were `CI` 28297538170, `GitHub Pages` 28297538171, and `Release Please` 28297538175.
 Closed obsolete PRs: Closed Dependabot PRs #22 (`react` 19.2.7) and #23 (`react-dom` 19.2.7) as obsolete because both only modified the removed Docusaurus/npm docs files (`docs/package.json` and `docs/package-lock.json`), while current `master` uses the MkDocs/uv docs stack (`docs/mkdocs.yml` and `docs/uv.lock`). The old #22 CI failure was the expected React/react-dom version mismatch on the removed Docusaurus stack.
 Current state: `gh pr list --state open --author 'dependabot[bot]'` returned no open PRs, `origin` has no remaining `dependabot/*` branches, no local `dependabot/*` branches remain, and the `master` checkout is clean at `7cc9241`.
+
+## 2026-06-27 11:20 — Close
+Merged PRs: #27 (`actions/checkout` 7.0.0), #28 (`actions/cache` 6.0.0), and #29 (`actions/setup-go` 6.5.0) were squash-merged to `master`; local `master` is fast-forwarded to `7cc9241`.
+Closed PRs: #22 (`react` 19.2.7) and #23 (`react-dom` 19.2.7) were closed as obsolete because the Docusaurus/npm docs package files they modified no longer exist.
+Verification: Final push workflows passed for `CI` 28297538170, `GitHub Pages` 28297538171, `Release Please` 28297538175, and CodeQL 28297728640. A stale Dependabot security-update job for the old npm `/docs` surface failed with `/docs not found`; this is recorded as an open thread in `SUMMARY.md`.
+Handoff state: No open Dependabot PRs remain, no `dependabot/*` local or remote branches remain, the implementation checkout is clean, and closeout artifacts were written under `.journal/007/`.

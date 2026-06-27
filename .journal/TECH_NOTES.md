@@ -9,3 +9,4 @@
 - Required default-branch checks are `ci`, `Binary Release Dry Run`, and `Container Image Dry Run`.
 - CI uses GitHub-native caches for Go modules, Go build artifacts, golangci-lint, npm downloads, and BuildKit `type=gha` layer caches. Keep `.moon/toolchains.yml`, `.go-version`, and `go.mod` aligned; treat Moon remote cache as a later opt-in requiring a Bazel Remote Execution-compatible backend and credentials.
 - GitHub-specific helper scripts live under `.github/scripts`. The release workflow uses `stage_ghd_release_assets.py` to validate `ghd.toml`, stage GoReleaser binary/SBOM/checksum assets, and verify release checksums before upload.
+- Docs now use MkDocs plus `uv` (`docs/mkdocs.yml`, `docs/uv.lock`), not the old Docusaurus/npm package files. Obsolete Dependabot PRs or stale security-update jobs for `docs/package.json` / `docs/package-lock.json` should be closed or dismissed rather than reintroducing those files.
