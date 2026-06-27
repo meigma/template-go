@@ -1,0 +1,19 @@
+---
+id: 006
+title: TBD
+started: 2026-05-19
+---
+
+## 2026-05-19 19:47 — Kickoff
+Goal for the session: Start a new journal session; the substantive work request is still pending.
+Current state of the world: Startup context has been loaded. Required project skills are `git` and `worktrunk`; `.journal/TECH_NOTES.md` records the current release-template constraints around GoReleaser binary assets, GitHub-native container publishing, Release Please tags, digest-pinned Dockerfile references, required checks, CI caching, and `.github/scripts` helpers. The latest closed session summaries read were 005, 003, and 002. The repo is on `master` with a clean worktree.
+Plan: Wait for the user's actual request, then continue logging meaningful checkpoints in this session.
+
+## 2026-05-19 19:52 — ARM runner discussion
+User asked whether ARM Docker builds can move to ARM runners because some repos spend 10+ minutes on large ARM container builds. Loaded `github-actions` skill and checked current GitHub docs: standard hosted Ubuntu ARM labels now include `ubuntu-24.04-arm` and `ubuntu-22.04-arm`; larger Linux ARM64 runners are available for Team/Enterprise orgs; GitHub announced on 2026-05-14 that ARM64 hosted runner images are moving under GitHub maintenance with no workflow action required. Inspected this repo's release workflows and Dockerfile. Current multi-platform container builds run on `ubuntu-24.04` with `platforms: linux/amd64,linux/arm64`; the Dockerfile uses `FROM --platform=$BUILDPLATFORM` plus Go cross-compilation, so this template is less likely to pay the full QEMU cost, but split native per-arch build jobs are still the right pattern for heavier target-architecture Dockerfiles.
+
+## 2026-05-19 20:15 — Native ARM runner implementation
+Implemented the accepted plan in Worktrunk branch `feat/native-arm-docker-runners` under `.wt/feat-native-arm-docker-runners`. Changed `release.yml` so per-platform container images build on native runners (`linux/amd64` on `ubuntu-24.04`, `linux/arm64` on `ubuntu-24.04-arm`), push digest-addressed images, upload digest artifacts, then assemble and attest the final multi-platform manifest in the existing `Container Image Release` job. Changed `release-dry-run.yml` so native per-platform OCI archive builds feed an aggregate `Container Image Dry Run` gate, preserving the required status-check name and the local amd64 smoke path. Updated README/DELETE_ME wording and TECH_NOTES for the native-runner release shape. Validation: `actionlint .github/workflows/release.yml .github/workflows/release-dry-run.yml`, Ruby YAML parsing for all workflows, `git diff --check`, `moon run root:check --summary minimal`, and a local amd64 Docker Buildx OCI export with a temporary `docker-container` builder all passed. A first local Buildx attempt with the default `docker` driver failed because attestations require a non-default/container builder; the CI workflow already uses `docker/setup-buildx-action`, and the temporary `docker-container` rerun matched that shape and passed.
+
+## 2026-05-19 20:30 — Close
+User approved PR #15. Squash-merged `feat/native-arm-docker-runners` into `master` as `802183a91f655b85a9a32f2f997c2b267d517133`, fast-forwarded the local default branch, deleted the remote feature branch, and removed `.wt/feat-native-arm-docker-runners`. The first `gh pr merge --squash --delete-branch` completed the GitHub merge but failed local cleanup because `master` was already checked out in the main worktree; verified the merged PR before continuing cleanup. Dispatched manual `Release Dry Run` run `26139498812` on `master`; it passed with binary dry run, native platform dry runs (`linux/amd64` in 53s, `linux/arm64` in 1m36s), and aggregate `Container Image Dry Run` in 1m0s. Wrote `.journal/006/SUMMARY.md`, updated `.journal/INDEX.md`, and confirmed `.journal/TECH_NOTES.md` already records the native hosted-runner release shape.
