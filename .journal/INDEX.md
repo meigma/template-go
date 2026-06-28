@@ -8,4 +8,4 @@
 | 005 | 2026-05-19 | Extract GitHub release scripts | complete | Moved GitHub-specific scripts under `.github/scripts` and replaced release asset Bash with a tested Python helper. |
 | 006 | 2026-05-19 | Native ARM Docker runners | complete | Split container release dry-run and publish paths across native amd64 and arm64 hosted runners. |
 | 007 | 2026-06-27 | Dependabot PR cleanup | complete | Cleared all open Dependabot PRs by merging the live Actions bumps and closing obsolete Docusaurus-era docs bumps. |
-| 008 | 2026-06-27 | Reproduce template-go-api session-015 tooling migration | in-progress | Reproducing the mise + melange/apko + SLSA-L3 reusable-attest migration from the downstream API fork as 3 mirrored PRs, then a forced prerelease-tag rehearsal. |
+| 008 | 2026-06-27 | Reproduce template-go-api session-015 tooling migration | complete | Reproduced the mise + melange/apko + SLSA-L3 reusable-attest migration (PRs #30/#31/#35) and ported the session-016 mise/melange/apko skills (#36), proven by a verified v0.1.2-rc.1 release rehearsal. |

@@ -236,3 +236,23 @@ here, like the existing git/worktrunk/session-* skills); NOT added to .journal/S
 .gitignore still blanket-ignores `.agents/` (force-add workaround); the API repo refined
 its .gitignore to track `.agents/skills` normally — a worthwhile template improvement,
 left out of scope. #36 awaiting developer review/merge.
+
+## 2026-06-27 21:20 — Close
+Developer: "LGTM please merge and close out this session." All four session PRs
+merged to master (`9ba9263`):
+- #30 `98f028b` build(tooling): Proto → mise
+- #31 `e9703a1` build(release): Dockerfile → melange/apko (+ Kusari cache:false; - docker Dependabot ecosystem)
+- #35 `2d57b10` ci(release): isolated attest.yml (SLSA L3) — superseded auto-closed #32
+- #36 `9ba9263` docs(skills): mise/melange/apko skills
+
+Local `master` fast-forwarded to `9ba9263`; all `build/*` + `docs/tooling-skills`
+worktrees removed; only `master` + `journal/jmgilman` remain. Migration proven by the
+verified `v0.1.2-rc.1` rehearsal (now cleaned up). No journal contamination on master
+(`git ls-files .journal` empty). SUMMARY.md written; INDEX row 008 → complete;
+TECH_NOTES.md revised for the mise/melange/apko/attest.yml end-state (the old
+Dockerfile/.go-version/BuildKit notes were stale).
+
+Handoff / open (maintainer): routine Dependabot PRs #33 (`actions/attest 4.1.0→4.1.1`
+— would align attest.yml, which pins 4.1.0) and #34 (`actions/cache`); Release Please
+#9 (`release 0.1.2`); and the optional `.gitignore` `.agents/skills` carve-out (force-add
+convention vs the API repo's normal tracking). Session complete.
