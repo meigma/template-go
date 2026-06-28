@@ -114,3 +114,27 @@ squash-merges to master (GitHub auto-retargets). So local validation carries PR2
 merge. Plan: build PR3, present all 3, let developer review/merge sequentially (PR30→31→32),
 then forced prerelease-tag rehearsal. Required check job names preserved
 (`Binary Release Dry Run`, `Container Image Dry Run`).
+
+## 2026-06-27 20:21 — PR3 built; all 3 PRs open and stacked
+**PR3 #32** `ci(release): generate provenance in an isolated reusable workflow (SLSA L3)`
+— pushed (stacked on build/melange-apko). New `.github/workflows/attest.yml` (reusable,
+isolated OIDC → SLSA Build L3; #33 GHCR login baked in). release.yml: binary job →
+contents-only + uploads checksums artifact; new `attest-binaries` job (uses attest.yml,
+**#29 packages:write baked in**); inline image-provenance step → new `attest-image` job;
+cosign sign + syft SBOM attestation stay in-job. signer_workflow→attest.yml in ghd.toml,
+stage_ghd_release_assets.py (+test), release-dry-run.yml. README/DELETE_ME updated.
+Validated: YAML parses, job DAG well-formed (verified via python), stage-script unit
+tests pass (6/6 incl. wrong-signer + attest.yml-signer cases). Container job keeps
+id-token/attestations (cosign + inline attest-sbom).
+
+**All three PRs open, stacked:**
+- #30 build/mise-tooling → master — **CI green** (ci + GitHub Pages).
+- #31 build/melange-apko → build/mise-tooling — local validation only (stacked; CI activates on retarget). Image built + smoke-tested locally.
+- #32 build/slsa-attest → build/melange-apko — local validation only (YAML + DAG + stage tests).
+
+**Next:** developer reviews/merges #30 → #31 → #32 (each retargets to master + runs CI as
+its base merges). Then forced prerelease-tag rehearsal to exercise the tag-only
+attest/publish path (dry-run can't reach it). NOTE: a pre-existing Release Please PR #9
+(`release 0.1.2`) is open; after these merge, Release Please reconciles changelog +
+melange.yaml/apko.yaml x-release-please-version markers — relevant when picking the
+rehearsal tag. Awaiting developer direction on merge + rehearsal execution.
