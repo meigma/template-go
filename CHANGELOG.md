@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/meigma/template-go/compare/v0.1.1...v0.1.2) (2026-06-28)
+
+
+### Bug Fixes
+
+* **release:** harden container publishing ([#8](https://github.com/meigma/template-go/issues/8)) ([dceb740](https://github.com/meigma/template-go/commit/dceb740741eeb3a6cf86d503ba29acaf38457ef9))
+
 ## [0.1.1](https://github.com/meigma/template-go/compare/template-go-v0.1.0...template-go-v0.1.1) (2026-05-12)
 
 
