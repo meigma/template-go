@@ -138,3 +138,43 @@ attest/publish path (dry-run can't reach it). NOTE: a pre-existing Release Pleas
 (`release 0.1.2`) is open; after these merge, Release Please reconciles changelog +
 melange.yaml/apko.yaml x-release-please-version markers — relevant when picking the
 rehearsal tag. Awaiting developer direction on merge + rehearsal execution.
+
+## 2026-06-27 20:35 — All 3 PRs merged to master; paused before rehearsal
+Developer chose "I merge them sequentially." Done:
+- **#30 merged** (squash → master `98f028b`). Required checks green.
+- **#31**: retargeted to master, **rebased** (dropped redundant PR1 commit via the
+  cherry-pick skip), force-pushed. CI ran on master base. **Kusari flagged a HIGH
+  cache-poisoning risk**: melange-build + container-image-release ran jdx/mise-action
+  with `cache: true` (a poisoned Actions cache could taint the toolchain that
+  builds/signs real artifacts). Fixed: `cache: false` on both publishing-pipeline
+  mise-action steps (CI/dry-run/scan keep cache — they don't publish). New commit;
+  Kusari then **pass**. **Deliberate divergence #2 from session 015** (the API's
+  release.yml uses cache:true; Kusari evidently didn't flag it there). #31 merged
+  (squash → master `e9703a1`).
+- **#32 auto-CLOSED** when I deleted its base branch `build/melange-apko` after #31
+  merged (GitHub closes PRs whose base branch is deleted; can't reopen with base
+  gone). Rebased `build/slsa-attest` onto master with `git rebase --onto origin/master
+  8b2de39` (replays only the PR3 commit; combines cleanly with the kusari-fixed PR2
+  base), force-pushed, and opened a **fresh PR #35** (build/slsa-attest → master)
+  superseding #32. CI green incl. Kusari. **#35 merged** (squash → master `2d57b10`).
+
+Final master: 7cc9241 → 98f028b (#30 mise) → e9703a1 (#31 melange/apko) → 2d57b10
+(#35 SLSA L3 attest). master CI green (CI + Release Please success; CodeQL/Pages
+finishing). All build/* branches + worktrees removed.
+
+**LESSON**: when squash-merging a STACK, GitHub does NOT auto-retarget/keep dependent
+PRs — deleting a merged base branch closes the dependent PR. Safer next time: retarget
+the dependent PR to master FIRST (gh pr edit --base master), rebase --onto, THEN delete
+the old base branch. Also `gh pr merge --delete-branch` leaves the remote branch when the
+local branch is in a worktree (local delete fails first) — delete the remote explicitly.
+
+**Open PRs (not mine)**: release-please #9 (release 0.1.2), dependabot #33 (actions/attest
+4.1.0→4.1.1 — note: PR3 introduced actions/attest@4.1.0), #34 (actions/cache 6.0.0→6.1.0).
+
+**PAUSED before the forced prerelease-tag rehearsal** (developer asked to pause). Rehearsal
+plan to confirm with developer: pick a prerelease tag (e.g. v0.2.0-rc.1); resolve-release
+WAITS for a draft release, so create a draft GH release for that tag, push the tag → release.yml
+runs the full publish+attest path (GoReleaser binaries, melange apks, apko publish to GHCR,
+cosign sign, attest.yml provenance, syft SBOM attest). Then verify with cosign verify +
+gh attestation verify --signer-workflow …/attest.yml, and clean up the throwaway tag/release/
+GHCR image. This PUBLISHES a real image + tag — needs explicit go-ahead.
