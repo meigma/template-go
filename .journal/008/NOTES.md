@@ -86,3 +86,31 @@ PR-by-PR file plan (each in its own `wt` worktree off fetched master, squash-mer
 - Then: forced prerelease-tag rehearsal.
 
 Starting PR1 now.
+
+## 2026-06-27 20:14 — PR1 + PR2 built, pushed, PRs open
+Working in stacked `wt` worktrees off master: build/mise-tooling (PR1) →
+build/melange-apko (PR2) → build/slsa-attest (PR3, next).
+
+**PR1 #30** `build(tooling): replace proto with mise` — pushed, **CI green**
+(`ci` moon-under-mise + `GitHub Pages` both pass). mise.lock derived from the API's
+proven lock minus goose/sqlc/mockery (identical versions → identical entries).
+Validated locally: full `moon run root:check` (format/lint/build/test) + docs:build
+pass under the system toolchain with mise binaries.
+
+**PR2 #31** `build(release): build the container image with melange + apko` — pushed
+(stacked on build/mise-tooling). New melange.yaml/apko.yaml (CLI-adapted: ./cmd/template-go,
+template-go binary, --version/--message smoke tests, NO openapi). release.yml:
+melange-build matrix → apko publish + keyless cosign + syft SBOM + attest-build-provenance/
+attest-sbom; setup-go→go.mod; **#31 fix (mkdir -p sbom) baked in**. release-dry-run.yml +
+security-scan.yml → melange/apko. Deleted Dockerfile/.dockerignore/.go-version. mise.toml
+image-local task (no stack-up — no compose here). **Deliberate divergence from session 015**:
+removed the orphaned `docker` Dependabot ecosystem (API left it stale; session-007 lesson).
+Validated locally end-to-end: `mise run image-local` builds apk + assembles image; runs as
+**uid 65532**, entrypoint /usr/bin/template-go, --version stamping + --message both pass.
+
+**Stacking caveat**: PRs based on non-master branches do NOT trigger the branch-filtered
+`ci`/`GitHub Pages`/`release-dry-run` workflows. PR31/PR32 CI activates only after each base
+squash-merges to master (GitHub auto-retargets). So local validation carries PR2/PR3 until
+merge. Plan: build PR3, present all 3, let developer review/merge sequentially (PR30→31→32),
+then forced prerelease-tag rehearsal. Required check job names preserved
+(`Binary Release Dry Run`, `Container Image Dry Run`).
