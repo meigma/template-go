@@ -210,3 +210,29 @@ the API's session 015: Kusari-driven `cache: false` in the publishing pipeline, 
 of the orphaned docker Dependabot ecosystem. Left for the developer: routine dependabot PRs
 (#33 actions/attest 4.1.0→4.1.1 — note attest.yml pins 4.1.0; #34 actions/cache), and the
 release-please PR #9. Session work complete; awaiting any further direction or session-close.
+
+## 2026-06-27 21:12 — Follow-up: ported session-016 tooling skills (mise/melange/apko)
+Developer asked to copy over the skills introduced in template-go-api session 016
+(its PR #35 `e61e926`, `docs(skills)`: mise, melange, apko under `.agents/skills/`,
+6 files). Done as PR **#36** (`docs/tooling-skills` worktree), CI green
+(.agents-only diff; ci/Pages/CodeQL/Kusari pass, dry-runs skip), CLEAN/MERGEABLE.
+
+NOT a blind copy — adapted to template-go's actual config (verified against
+mise.toml/mise.lock/melange.yaml/apko.yaml):
+- mise SKILL: this repo's 8 tools (go, python, golangci-lint, uv, moon, melange,
+  apko, cosign); dropped sqlc/goose/mockery; REMOVED the API-only sqlc-no-checksum
+  caveat (every pinned tool here has a checksum); corrected the provenance subset
+  (github-attestations: uv/golangci-lint/python; cosign: cosign; none: go/melange/
+  apko/moon); single `image-local` task (no stack-up).
+- melange/apko SKILLs: template-go binary+image names, /usr/bin/template-go
+  entrypoint, --version/--message smoke test (no openapi), no embedded SQL/Cedar,
+  no compose.
+- references: swapped sqlc→golangci-lint examples, dropped stack-up, "embedded SQL
+  migrations and Cedar policies"→"module source", compose retag note generalized.
+
+Conventions mirrored from session 016: force-added (`.agents/` is blanket-gitignored
+here, like the existing git/worktrunk/session-* skills); NOT added to .journal/SKILLS.md
+(task-specific, surveyed-and-loaded per task). Flagged as a follow-up: template-go's
+.gitignore still blanket-ignores `.agents/` (force-add workaround); the API repo refined
+its .gitignore to track `.agents/skills` normally — a worthwhile template improvement,
+left out of scope. #36 awaiting developer review/merge.
