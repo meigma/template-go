@@ -178,3 +178,35 @@ runs the full publish+attest path (GoReleaser binaries, melange apks, apko publi
 cosign sign, attest.yml provenance, syft SBOM attest). Then verify with cosign verify +
 gh attestation verify --signer-workflow …/attest.yml, and clean up the throwaway tag/release/
 GHCR image. This PUBLISHES a real image + tag — needs explicit go-ahead.
+
+## 2026-06-27 20:55 — Rehearsal PASSED first try + verified + cleaned up. TASK COMPLETE.
+Developer approved rehearsal with tag **v0.1.2-rc.1**. Executed:
+- GOTCHA: `gh release create --draft` makes an UNTAGGED draft (no git tag until publish).
+  In the real flow release-please's `force-tag-creation` makes the tag. For the rehearsal,
+  created the draft release (backs tag_name v0.1.2-rc.1), then created+pushed an annotated
+  tag at master HEAD (`git -c tag.gpgSign=false tag -a … -m …`; plain `git tag` errored
+  "no tag message" — annotated is the default here). Tag push triggered release.yml (the
+  faithful `push: tags` path).
+- **release.yml run 28310464579: ALL JOBS SUCCESS, first try** — resolve-release, binary-
+  release-assets, attest-binaries (attest.yml), melange-build amd64+arm64, container-image-
+  release (apko publish + cosign + syft + attest-sbom), attest-image (attest.yml),
+  release-inspection-summary. No shakeout (the #29/#31/#33 + Kusari fixes held).
+- **Cryptographic verification** (image digest sha256:10622adf…, multi-arch amd64+arm64):
+  - `cosign verify` (cert-identity release.yml) → OK, 2 platform signatures.
+  - `gh attestation verify oci://… --signer-workflow …/attest.yml` → OK; provenance signer =
+    `…/attest.yml@refs/tags/v0.1.2-rc.1` (SLSA-L3 isolated signer confirmed).
+  - NEGATIVE control: verify against `…/release.yml` signer → exit 1 (correctly rejected) —
+    proves the attest.yml isolation is real.
+  - Draft release had all 9 assets (4 bins + 4 SBOMs + checksums); binary provenance verifies
+    against attest.yml (exit 0).
+- **Cleanup**: deleted draft release + git tag (local+remote); deleted the 9 rehearsal GHCR
+  versions (created 2026-06-28; the multi-arch index, platform manifests, cosign sig +
+  provenance/SBOM referrers). Preserved the 2026-05-12 v0.1.1 package set. master clean at
+  2d57b10, no v0.1.2-rc.1 tag anywhere.
+
+OUTCOME: session-015 tooling migration FULLY REPRODUCED in template-go, merged to master
+(#30/#31/#35), and proven by a verified release rehearsal. Two deliberate improvements over
+the API's session 015: Kusari-driven `cache: false` in the publishing pipeline, and removal
+of the orphaned docker Dependabot ecosystem. Left for the developer: routine dependabot PRs
+(#33 actions/attest 4.1.0→4.1.1 — note attest.yml pins 4.1.0; #34 actions/cache), and the
+release-please PR #9. Session work complete; awaiting any further direction or session-close.
