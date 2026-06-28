@@ -11,7 +11,7 @@ It is only here to orient the initial project owner.
 - A minimal Go module at `github.com/meigma/template-go`.
 - A Cobra/Viper CLI skeleton under `cmd/template-go` and `internal/cli`.
 - Moon tasks for `format`, `lint`, `build`, `test`, and `check`.
-- `golangci-lint` wired through Proto and Moon.
+- `golangci-lint` wired through mise and Moon.
 - CI that delegates to `moon ci --summary minimal` with pinned actions, dependency caches, and minimal token permissions.
 - A scheduled container vulnerability scan that uploads SARIF results to GitHub code scanning.
 - Dependabot coverage for GitHub Actions, Docker base images, Go modules, and the docs uv project.
