@@ -60,25 +60,26 @@ The CLI entrypoint uses Cobra and Viper in the same shape as other Meigma CLIs: 
 
 ## Container Image
 
-The included Dockerfile builds a static Linux binary and copies it into a non-root distroless runtime image:
+The image is built **without a Dockerfile**:
+[melange](https://github.com/chainguard-dev/melange) compiles the binary into a
+signed [Wolfi](https://github.com/wolfi-dev) apk (`melange.yaml`), and
+[apko](https://github.com/chainguard-dev/apko) assembles it into a minimal,
+multi-arch, non-root runtime image (`apko.yaml`) — the modern equivalent of the
+former distroless image (uid 65532, ca-certificates, tzdata, no shell). Each
+architecture builds natively (no QEMU). Build and run it locally with the bundled
+mise task (it uses melange's Docker runner, so Docker must be running):
 
 ```sh
-docker build --target test .
-docker build -t template-go:dev .
+mise run image-local              # build the host-arch image, load as template-go:dev
 docker run --rm template-go:dev --version
+docker run --rm template-go:dev --message "hello from container"
 ```
 
-The Dockerfile pins the builder and runtime images by digest and verifies that the selected Go builder image matches `.go-version`. When bumping Go, update `.go-version` and the builder `FROM` tag/digest together.
-
-Release builds can pass the same binary metadata injected by GoReleaser:
-
-```sh
-docker build \
-  --build-arg VERSION="$(git describe --tags --always --dirty)" \
-  --build-arg COMMIT="$(git rev-parse HEAD)" \
-  --build-arg DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  -t template-go:dev .
-```
+The Wolfi base intentionally floats to the latest packages (fresh CA bundle and
+timezones, low CVE surface); the exact resolved versions are recorded in the
+per-build SBOM and provenance attestation rather than pinned. `version`, `commit`,
+and `date` are stamped into the binary via melange `--vars-file` — the release
+workflow supplies the real values, and `mise run image-local` uses `dev`.
 
 ## CI and Security
 
@@ -86,7 +87,7 @@ The default CI workflow keeps permissions minimal, pins external actions, disabl
 It uses GitHub-hosted dependency caches for Go, golangci-lint, and uv download artifacts while leaving Moon remote caching as an optional follow-up for repositories that need a shared task-output cache.
 The docs workflow builds the MkDocs site on pull requests and deploys `docs/build` to GitHub Pages from the default branch.
 The scheduled security scan workflow builds the local container image weekly, scans it for high/critical fixed vulnerabilities, and uploads SARIF results to GitHub code scanning.
-Dependabot covers GitHub Actions, Docker base images, the root Go module, and the docs uv project.
+Dependabot covers GitHub Actions, the root Go module, and the docs uv project.
 
 Repository settings live in `.github/repository-settings.toml`.
 They default to immutable releases, private vulnerability reporting, signed commits, squash-only merges, GitHub Pages workflow publishing, and protected tags.
@@ -100,10 +101,10 @@ The release path is:
 
 - Release Please opens and maintains the release PR.
 - Release Please creates a draft GitHub release and tag after merge.
-- Release Dry Run rehearses the GoReleaser binary path and native-runner Docker container build path on pull requests.
+- Release Dry Run rehearses the GoReleaser binary path and the native-runner melange/apko container build path on pull requests.
 - GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
 - The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
-- The release workflow builds amd64 and arm64 container images on native GitHub-hosted runners, publishes `ghcr.io/meigma/template-go:vX.Y.Z` as a multi-platform manifest, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the manifest digest.
+- The release workflow builds per-arch signed apks with melange on native GitHub-hosted runners, assembles and publishes `ghcr.io/meigma/template-go:vX.Y.Z` as a multi-platform manifest with apko, signs it with keyless cosign, and creates GitHub-native provenance and SBOM attestations for the manifest digest.
 - A human inspects the draft release before publication.
 
 The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow runs.
